@@ -1,0 +1,125 @@
+{
+  "performance": [
+    {
+      "turn": 360,
+      "at": "2026-11-20T16:42:51Z",
+      "values": {
+        "clement": 18541.69,
+        "random_trader": 18943.9,
+        "random_buyer": 18458.89,
+        "random_seller": 18005.8
+      }
+    },
+    {
+      "turn": 361,
+      "at": "2026-11-20T17:22:22Z",
+      "values": {
+        "clement": 18533.91,
+        "random_trader": 18890.62,
+        "random_buyer": 18443.55,
+        "random_seller": 18005.8
+      }
+    },
+    {
+      "turn": 362,
+      "at": "2026-11-20T22:54:23Z",
+      "values": {
+        "clement": 18590.07,
+        "random_trader": 18799.91,
+        "random_buyer": 18487.5,
+        "random_seller": 18005.8
+      }
+    },
+    {
+      "turn": 363,
+      "at": "2026-11-21T03:41:05Z",
+      "values": {
+        "clement": 18410.98,
+        "random_trader": 18536.83,
+        "random_buyer": 18286.27,
+        "random_seller": 18005.8
+      }
+    },
+    {
+      "turn": 364,
+      "at": "2026-11-21T11:57:29Z",
+      "values": {
+        "clement": 18391.23,
+        "random_trader": 18442.32,
+        "random_buyer": 18255.98,
+        "random_seller": 18005.8
+      }
+    },
+    {
+      "turn": 365,
+      "at": "2026-11-21T18:44:22Z",
+      "values": {
+        "clement": 18201.51,
+        "random_trader": 18046.05,
+        "random_buyer": 18036.77,
+        "random_seller": 18005.8
+      }
+    },
+    {
+      "turn": 366,
+      "at": "2026-11-21T23:39:59Z",
+      "values": {
+        "clement": 18160.67,
+        "random_trader": 18084.25,
+        "random_buyer": 17999.14,
+        "random_seller": 18005.8
+      }
+    },
+    {
+      "turn": 367,
+      "at": "2026-11-22T04:30:49Z",
+      "values": {
+        "clement": 18356.96,
+        "random_trader": 18097.02,
+        "random_buyer": 18189.19,
+        "random_seller": 18005.8
+      }
+    },
+    {
+      "turn": 368,
+      "at": "2026-11-22T12:58:50Z",
+      "values": {
+        "clement": 18352.13,
+        "random_trader": 18041.15,
+        "random_buyer": 18179.47,
+        "random_seller": 18005.8
+      }
+    },
+    {
+      "turn": 369,
+      "at": "2026-11-22T20:11:55Z",
+      "values": {
+        "clement": 18438.51,
+        "random_trader": 18046.78,
+        "random_buyer": 18265.8,
+        "random_seller": 18005.8
+      }
+    },
+    {
+      "turn": 370,
+      "at": "2026-11-23T01:19:09Z",
+      "values": {
+        "clement": 18184.04,
+        "random_trader": 17823.15,
+        "random_buyer": 18000.0,
+        "random_seller": 18005.8
+      }
+    },
+    {
+      "turn": 371,
+      "at": "2026-11-23T10:06:02Z",
+      "values": {
+        "clement": 18521.61,
+        "random_trader": 17857.74,
+        "random_buyer": 18337.88,
+        "random_seller": 18005.8
+      }
+    }
+  ],
+  "decisions": []
+}

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Tableau de bord du portefeuille de Clément Moquereau sur le marché ENSIM Trade Center.">
+  <title>ENSIM Trade Center · Portefeuille de Clément</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./dashboard.js" defer></script>
+</head>
+<body>
+  <header class="masthead">
+    <div class="shell header-inner">
+      <a class="wordmark" href="./"><span aria-hidden="true">E</span> ENSIM Trade Center</a>
+      <div class="header-actions"><span id="market-round">Dernier tour publié</span><button id="refresh" type="button">Actualiser</button></div>
+    </div>
+  </header>
+  <main class="shell">
+    <div class="intro">
+      <div><p class="eyebrow">Marché simulé · Clément Moquereau</p><h1>Suivi du portefeuille</h1></div>
+      <p id="status" role="status">Chargement des données…</p>
+    </div>
+    <div class="metrics" aria-label="Indicateurs du portefeuille">
+      <article class="card metric"><h2>Valeur du portefeuille</h2><strong id="value">—</strong><p>Argent et stock au prix du marché</p></article>
+      <article class="card metric"><h2>Rendement observé</h2><strong id="return">—</strong><p id="return-note">Depuis le premier classement disponible</p></article>
+      <article class="card metric"><h2>Baisse maximale</h2><strong id="drawdown">—</strong><p>Plus fort recul depuis un sommet</p></article>
+    </div>
+
+    <section class="card performance" aria-labelledby="performance-title">
+      <div class="section-heading">
+        <div><h2 id="performance-title">Portefeuille et références</h2><p id="chart-note">Valeurs du classement officiel</p></div>
+        <div class="chart-controls">
+          <label for="chart-mode">Mesure</label>
+          <select id="chart-mode"><option value="value">Valeur</option><option value="risk">Recul depuis le sommet</option></select>
+          <label for="chart-range">Période</label>
+          <select id="chart-range"><option value="0">Tout l’historique</option><option value="20">20 derniers relevés</option><option value="50">50 derniers relevés</option></select>
+        </div>
+      </div>
+      <ul class="legend" id="legend"></ul>
+      <div class="chart"><canvas id="chart" aria-label="Évolution par tour des quatre portefeuilles" role="img"></canvas></div>
+      <div class="chart-readout"><label for="cursor">Explorer un tour</label><input id="cursor" type="range" min="0" max="0" value="0"><p id="chart-point"></p></div>
+      <p id="chart-empty" class="empty" hidden>Aucun classement disponible.</p>
+    </section>
+
+    <section class="signals-section" aria-labelledby="signals-title">
+      <div class="section-heading"><div><h2 id="signals-title">Signaux par produit</h2><p id="signals-note">Derniers ordres calculés</p></div></div>
+      <div class="signals" id="signals"><p class="empty">En attente du premier calcul.</p></div>
+    </section>
+
+    <section class="card journal" aria-labelledby="journal-title">
+      <div class="section-heading"><div><h2 id="journal-title">Journal des décisions</h2><p>Les quantités indiquent les ordres transmis au marché.</p></div><label class="filter" for="product-filter">Produit <select id="product-filter"><option value="">Tous</option><option>A</option><option>B</option><option>C</option></select></label></div>
+      <div class="table-scroll"><table><thead><tr><th>Tour observé</th><th>Calcul</th><th>Produit</th><th>Ordre</th><th>Motif</th></tr></thead><tbody id="journal"></tbody></table></div>
+      <p id="journal-empty" class="empty">En attente du premier calcul.</p>
+      <button type="button" id="show-more" hidden>Afficher les décisions précédentes</button>
+    </section>
+  </main>
+  <footer class="shell footer"><a href="https://github.com/exofri/ensim-trade-center">Marché ENSIM</a><a href="https://github.com/MoquereauClement/ensim-trade-moquereau/blob/main/RAPPORT.md">Rapport du TP</a></footer>
+</body>
+</html>
