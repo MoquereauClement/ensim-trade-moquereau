@@ -121,5 +121,33 @@
       }
     }
   ],
-  "decisions": []
+  "decisions": [
+    {
+      "turn": 371,
+      "at": "2026-11-23T13:40:28Z",
+      "products": {
+        "A": {
+          "price": 4.233,
+          "signal": 0.0,
+          "buy_limit": 4.440405,
+          "sell_limit": 5.626695,
+          "reason": "Aucun retournement sur les trois derniers prix."
+        },
+        "B": {
+          "price": 12.2819,
+          "signal": 0.0,
+          "buy_limit": 10.547885362,
+          "sell_limit": 13.257764254,
+          "reason": "Rebond au-dessus du seuil d’achat."
+        },
+        "C": {
+          "price": 1.0067,
+          "signal": 0.0,
+          "buy_limit": 0.9162467999999999,
+          "sell_limit": 1.369432905,
+          "reason": "Aucun retournement sur les trois derniers prix."
+        }
+      }
+    }
+  ]
 }
