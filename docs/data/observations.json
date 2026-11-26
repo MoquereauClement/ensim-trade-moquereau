@@ -179,6 +179,16 @@
         "random_buyer": 19265.68,
         "random_seller": 18005.8
       }
+    },
+    {
+      "turn": 381,
+      "at": "2026-11-26T03:52:50Z",
+      "values": {
+        "clement": 19509.45,
+        "random_trader": 18933.64,
+        "random_buyer": 19402.35,
+        "random_seller": 18005.8
+      }
     }
   ],
   "decisions": [
@@ -368,6 +378,33 @@
           "buy_limit": 0.9162467999999999,
           "sell_limit": 1.369432905,
           "reason": "Rebond au-dessus du seuil d’achat."
+        }
+      }
+    },
+    {
+      "turn": 381,
+      "at": "2026-11-26T05:26:05Z",
+      "products": {
+        "A": {
+          "price": 4.6568,
+          "signal": 0.0,
+          "buy_limit": 4.440405,
+          "sell_limit": 5.626695,
+          "reason": "Aucun retournement sur les trois derniers prix."
+        },
+        "B": {
+          "price": 12.5156,
+          "signal": 0.0,
+          "buy_limit": 10.547885362,
+          "sell_limit": 13.257764254,
+          "reason": "Rebond au-dessus du seuil d’achat."
+        },
+        "C": {
+          "price": 1.333,
+          "signal": 0.0,
+          "buy_limit": 0.9162467999999999,
+          "sell_limit": 1.369432905,
+          "reason": "Retournement sous le seuil de vente."
         }
       }
     }
