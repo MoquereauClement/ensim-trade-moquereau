@@ -9,7 +9,7 @@ HOLDINGS_URL = "https://raw.githubusercontent.com/exofri/ensim-trade-center/main
 
 MIN_MONEY_RESERVE = 50 # never let a buy signal spend below this much money
 ZONE_FRACTION = 0.15
-TRADE_SIGNAL = 0.1  # 10 unités par ordre
+TRADE_SIGNAL = 1.0  # 100 unités maximum par ordre
 CYCLE_RULES = {
     "B": {"drop": 0.174, "rise": 0.349, "reversal": 0.05},
     "C": {"drop": 0.400, "rise": 0.565, "reversal": 0.10},

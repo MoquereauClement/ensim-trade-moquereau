@@ -2,7 +2,7 @@
 
 Clément Moquereau · TP 2 de Business Intelligence
 
-L’objectif est de faire progresser la valeur totale du portefeuille tout en limitant les reculs depuis ses meilleurs niveaux. La stratégie compare les trois derniers prix de chaque produit pour confirmer un retournement dans une zone d’achat ou après un sommet dans la zone de vente. Sur 371 tours rejoués, elle gagne 11,47 %. Le vendeur aléatoire subit une baisse maximale beaucoup plus faible, ce qui illustre le compromis entre rendement et exposition au marché.
+L’objectif est de faire progresser la valeur totale du portefeuille tout en limitant les reculs depuis ses meilleurs niveaux. La stratégie compare les trois derniers prix de chaque produit pour confirmer un retournement dans une zone d’achat ou après un sommet dans la zone de vente. Sur 371 tours rejoués, elle gagne 54,56 % avec des ordres de 100 unités au maximum. Le vendeur aléatoire subit une baisse maximale beaucoup plus faible, ce qui illustre le compromis entre rendement et exposition au marché.
 
 ## Règles de décision
 
@@ -14,7 +14,7 @@ Une baisse suivie d’une hausse confirme un creux local. L’achat demande que 
 
 Pour B et C, le seuil d’achat est la cible majorée de 3 % et le seuil de vente la cible minorée de 3 %. Le script confirme le sommet ou le creux de référence après une variation inverse de 5 % pour B ou de 10 % pour C. Ces filtres réduisent les changements de référence dus aux petites oscillations. Ils peuvent aussi retarder la prise en compte d’un nouveau cycle.
 
-Le plafond est de dix unités par produit. Les ventes sont limitées au stock. Les achats se partagent le budget dans l’ordre A, B, C et laissent une réserve de 50 au prix observé. Le prix d’exécution du tour suivant peut changer le montant effectivement dépensé.
+Le plafond est de 100 unités par produit et par tour. Les ventes sont limitées au stock. Les achats se partagent le budget dans l’ordre A, B, C et laissent une réserve de 50 au prix observé. Le prix d’exécution du tour suivant peut changer le montant effectivement dépensé.
 
 ## Simulation historique
 
@@ -22,13 +22,14 @@ Le portefeuille initial contient 1 000 d’argent et 1 000 unités de chaque pro
 
 | Stratégie | Valeur finale | Rendement | Baisse maximale |
 | --- | ---: | ---: | ---: |
-| Stratégie A, B et C | 19 366,65 | +11,47 % | 16,90 % |
+| Stratégie A, B et C, 100 unités max. | 26 853,44 | +54,56 % | 12,64 % |
+| Même règle, 10 unités max. | 19 366,65 | +11,47 % | 16,90 % |
 | Garder le portefeuille | 18 521,60 | +6,61 % | 17,81 % |
 | Trader aléatoire | 17 783,42 | +2,36 % | 18,52 % |
 | Acheteur aléatoire | 18 604,31 | +7,08 % | 18,77 % |
 | Vendeur aléatoire | 18 081,47 | +4,07 % | 0,54 % |
 
-La stratégie gagne 845,05 de plus que le portefeuille conservé et devance 73,9 % des trajectoires du trader aléatoire. Sur les mêmes tours, l’ancienne règle, qui comparait le prix après la baisse au seuil de vente, donnait 11,59 %. Le vendeur aléatoire sort progressivement du marché et conserve son argent. Sa faible baisse maximale s’accompagne ici d’un rendement inférieur. Les amplitudes de B et C ont été estimées sur les mêmes 371 tours. Ce résultat mesure l’efficacité sur l’historique observé. Seuls les tours suivants permettent de vérifier si elle se maintient.
+Sur cet historique, des ordres plus grands amplifient l’effet des signaux. La simulation recalcule l’ordre à chaque tour. En pratique, le marché peut relire un ordre si le bot tarde à le remplacer, ce qui amplifie aussi l’exposition. Le vendeur aléatoire sort progressivement du marché et conserve son argent. Sa faible baisse maximale s’accompagne ici d’un rendement inférieur. Les amplitudes de B et C et le choix de la taille d’ordre reposent sur les mêmes 371 tours. Seuls les tours suivants permettent de vérifier si les résultats se maintiennent.
 
 ## Suivi des décisions
 

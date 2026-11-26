@@ -19,7 +19,7 @@ class RoundUpdateTests(unittest.TestCase):
                 for t, price in enumerate([20, 10.3, 9.3, 10.5], 368)
             ],
         }
-        holdings = {"money": 1000, "products": {"A": 1000, "B": 1000, "C": 1000}}
+        holdings = {"money": 2000, "products": {"A": 1000, "B": 1000, "C": 1000}}
         leaderboard = {"generated_at": timestamp, "leaderboard": [{"id": "clement", "total_value": 18000}]}
         with tempfile.TemporaryDirectory() as folder:
             data_path = Path(folder) / "observations.json"
@@ -27,8 +27,8 @@ class RoundUpdateTests(unittest.TestCase):
             self.assertTrue(update_round(market, holdings, leaderboard, data_path, decision_path))
             observation = json.loads(data_path.read_text(encoding="utf-8"))
             decision = json.loads(decision_path.read_text(encoding="utf-8"))
-            self.assertEqual(observation["decisions"][0]["products"]["A"]["signal"], 0.1)
-            self.assertEqual(decision["A"], 0.1)
+            self.assertEqual(observation["decisions"][0]["products"]["A"]["signal"], 1.0)
+            self.assertEqual(decision["A"], 1.0)
             self.assertEqual(observation["performance"][0]["values"], {"clement": 18000})
             self.assertEqual(observation["market"]["cash"], holdings["money"])
             self.assertEqual(observation["market"]["stocks"], holdings["products"])
