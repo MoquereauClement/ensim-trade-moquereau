@@ -1,4 +1,4 @@
-"""Enregistre une décision et le classement officiel du dernier tour publié."""
+"""Publie le tableau de bord et, pour chaque nouveau tour, un ordre."""
 
 import json
 from datetime import datetime, timezone
@@ -61,15 +61,30 @@ def update_round(market, holdings, leaderboard, data_path=DATA_PATH, decision_pa
     data = json.loads(data_path.read_text(encoding="utf-8")) if data_path.exists() else {"performance": [], "decisions": []}
     row = history[-1]
     turn = row["t"]
-    if data["decisions"] and turn <= data["decisions"][-1]["turn"]:
+    if data["decisions"] and turn < data["decisions"][-1]["turn"]:
         return False
     if data["performance"] and turn < data["performance"][-1]["turn"]:
         raise ValueError("Le tour reçu est antérieur au dernier classement déjà enregistré.")
 
+    product_names = market["products"]
+    snapshot = {
+        "turn": turn,
+        "cash": holdings["money"],
+        "stocks": {name: holdings["products"][name] for name in product_names},
+        "prices": [{"turn": entry["t"], **{name: entry[name] for name in product_names}} for entry in history],
+    }
+    if data["decisions"] and turn == data["decisions"][-1]["turn"]:
+        if data.get("market") == snapshot:
+            return False
+        data["market"] = snapshot
+        write_json(data_path, data)
+        return True
+
+    data["market"] = snapshot
     decision = algorithm.build_decision(market, holdings)
     products = {
         name: describe_order([entry[name] for entry in history], name, decision[name])
-        for name in market["products"]
+        for name in product_names
     }
     point = performance_point(row, leaderboard)
     if data["performance"] and data["performance"][-1]["turn"] == turn:
@@ -88,7 +103,7 @@ def main():
         algorithm.fetch_json(algorithm.HOLDINGS_URL),
         algorithm.fetch_json(LEADERBOARD_URL),
     )
-    print("Décision et classement enregistrés." if changed else "Aucun nouveau tour à traiter.")
+    print("Données du marché et du portefeuille actualisées." if changed else "Aucun nouveau tour à traiter.")
 
 
 if __name__ == "__main__":

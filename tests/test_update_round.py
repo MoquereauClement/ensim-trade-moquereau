@@ -30,6 +30,16 @@ class RoundUpdateTests(unittest.TestCase):
             self.assertEqual(observation["decisions"][0]["products"]["A"]["signal"], 0.1)
             self.assertEqual(decision["A"], 0.1)
             self.assertEqual(observation["performance"][0]["values"], {"clement": 18000})
+            self.assertEqual(observation["market"]["cash"], holdings["money"])
+            self.assertEqual(observation["market"]["stocks"], holdings["products"])
+            self.assertEqual(observation["market"]["prices"][-1], {"turn": 371, "A": 10.5, "B": 10, "C": 1})
+
+            # Ajouter les nouvelles données au journal existant sans republier l'ordre.
+            legacy = {key: value for key, value in observation.items() if key != "market"}
+            data_path.write_text(json.dumps(legacy), encoding="utf-8")
+            decision_before = decision_path.read_bytes()
+            self.assertTrue(update_round(market, holdings, leaderboard, data_path, decision_path))
+            self.assertEqual(decision_path.read_bytes(), decision_before)
             self.assertFalse(update_round(market, holdings, leaderboard, data_path, decision_path))
             self.assertEqual(json.loads(data_path.read_text(encoding="utf-8")), observation)
 

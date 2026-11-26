@@ -26,6 +26,7 @@ h2 { font-size: 1.2rem; }
 #status, .section-heading p, .metric p, .chart-readout, .empty { color: var(--muted); font-size: .9rem; }
 #status.error { color: #962b35; }
 .metrics, .signals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .9rem; }
+.metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .card { background: #fff; border: 1px solid var(--line); border-radius: .9rem; padding: 1.15rem; }
 .metric { border-top: 3px solid #5e9586; }
 .metric:first-child { border-top-color: var(--accent); }
@@ -50,6 +51,16 @@ input[type='range'] { accent-color: var(--accent); max-width: 40%; }
 #chart-point { white-space: normal; flex: 1 1 18rem; }
 .signals-section > .section-heading { margin-bottom: .65rem; }
 .signal-header, .filter { display: flex; align-items: center; justify-content: space-between; gap: .45rem; }
+.price-legend { margin: 0 0 .75rem; }
+.price-guide { color: var(--muted); font-size: .9rem; margin-bottom: .65rem; }
+.price-key { width: 1.1rem; border-top: 3px solid #285bae; }
+.buy-key { border-top: 2px dashed #006a54; }
+.sell-key { border-top: 2px dashed #a1482d; }
+.stock-line { margin-top: .65rem; color: var(--muted); font-size: .9rem; }
+.stock-line strong { color: #132b2e; }
+.price-chart { height: 175px; margin: .75rem 0 .1rem; }
+.price-readout { color: var(--muted); font-size: .85rem; min-height: 1.5rem; }
+.sell-gap { color: #783724; border-left: 2px solid #a1482d; padding-left: .5rem; font-size: .9rem; line-height: 1.4; margin: .35rem 0 .55rem; }
 .badge { display: inline-block; font-size: .86rem; font-weight: 700; border-radius: .4rem; padding: .28rem .49rem; background: #e8efec; color: #37534c; white-space: nowrap; }
 .badge.buy { background: #d7f5e7; color: #00523d; }
 .badge.sell { background: #fae6e4; color: #832b31; }
@@ -67,6 +78,7 @@ th { color: var(--muted); white-space: nowrap; }
 @media (max-width: 760px) {
   .intro, .section-heading { flex-wrap: wrap; }
   .chart-controls { justify-content: start; }
+  .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .signals { grid-template-columns: 1fr; }
   .chart { height: 250px; }
 }

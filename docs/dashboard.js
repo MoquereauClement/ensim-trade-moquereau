@@ -17,6 +17,9 @@ let data = { performance: [], decisions: [] };
 let logLimit = 20;
 let points = [];
 let plotBounds;
+const priceChartObserver = new ResizeObserver((entries) => {
+  for (const { target } of entries) target.redraw();
+});
 
 function element(tag, content, className) {
   const node = document.createElement(tag);
@@ -57,6 +60,7 @@ function renderPerformance() {
     $('return-note').textContent = `Depuis le tour ${first.turn}`;
     $('drawdown').textContent = percent.format(-Math.min(0, ...own.map((row) => row.risk.clement)));
   }
+  $('cash').textContent = format(number, data.market?.cash);
   const lastRound = rows.at(-1);
   if (lastRound) $('market-round').textContent = `Tour ${lastRound.turn}`;
   $('legend').replaceChildren(...series.map(({ name, color }) => {
@@ -170,21 +174,146 @@ function drawChart() {
   $('chart-point').textContent = [`Tour ${row.turn}`, ...selected].join(' · ');
 }
 
+function productChart(product, entries, signal) {
+  const container = element('div', undefined, 'price-chart');
+  const canvas = element('canvas');
+  const readout = element('p', undefined, 'price-readout');
+  canvas.setAttribute('role', 'img');
+  canvas.setAttribute('aria-label', `Prix de ${product}. Utilise les flèches du clavier pour explorer les tours.`);
+  canvas.tabIndex = 0;
+  container.append(canvas);
+  let selected = entries.length - 1;
+  let turnPosition;
+  const buy = signal.buy_limit;
+  const sell = signal.sell_limit;
+  const values = [...entries.map((row) => row[product]), buy, sell].filter(Number.isFinite);
+  const low = Math.min(...values);
+  const high = Math.max(...values);
+  const margin = (high - low) * .10 || Math.max(Math.abs(low) * .05, .05);
+
+  function draw() {
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    if (width < 65 || !height) return;
+    const ratio = window.devicePixelRatio || 1;
+    canvas.width = width * ratio;
+    canvas.height = height * ratio;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(ratio, ratio);
+    const left = 48;
+    const right = width - 11;
+    const top = 12;
+    const bottom = height - 24;
+    const firstTurn = entries[0].turn;
+    const turnSpan = entries.at(-1).turn - firstTurn;
+    turnPosition = (turn) => turnSpan ? left + (right - left) * (turn - firstTurn) / turnSpan : (left + right) / 2;
+    const y = (value) => bottom - (bottom - top) * (value - low + margin) / (high - low + 2 * margin);
+
+    function horizontal(at, color) {
+      ctx.strokeStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(left, at);
+      ctx.lineTo(right, at);
+      ctx.stroke();
+    }
+
+    ctx.font = '11px system-ui';
+    ctx.fillStyle = '#48635f';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    for (let i = 0; i < 4; i++) {
+      const value = (high + margin) - (high - low + 2 * margin) * i / 3;
+      horizontal(y(value), '#dde9e4');
+      ctx.fillText(number.format(value), left - 6, y(value));
+    }
+    ctx.textAlign = 'center';
+    for (const i of new Set([0, Math.floor((entries.length - 1) / 2), entries.length - 1])) {
+      ctx.fillText(entries[i].turn, turnPosition(entries[i].turn), height - 10);
+    }
+    ctx.setLineDash([5, 4]);
+    ctx.lineWidth = 1.5;
+    if (Number.isFinite(buy)) horizontal(y(buy), '#006a54');
+    if (Number.isFinite(sell)) horizontal(y(sell), '#a1482d');
+    ctx.setLineDash([]);
+
+    ctx.strokeStyle = '#285bae';
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    entries.forEach((row, i) => {
+      const x = turnPosition(row.turn);
+      if (i === 0) ctx.moveTo(x, y(row[product]));
+      else ctx.lineTo(x, y(row[product]));
+    });
+    ctx.stroke();
+
+    const row = entries[selected];
+    const x = turnPosition(row.turn);
+    ctx.strokeStyle = '#728f89';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 4]);
+    ctx.beginPath();
+    ctx.moveTo(x, top);
+    ctx.lineTo(x, bottom);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.arc(x, y(row[product]), 4, 0, 2 * Math.PI);
+    ctx.fillStyle = '#285bae';
+    ctx.fill();
+    readout.textContent = `Tour ${row.turn} · Prix ${price.format(row[product])}`;
+  }
+
+  canvas.addEventListener('pointermove', (event) => {
+    if (!turnPosition) return;
+    const cursor = event.clientX - canvas.getBoundingClientRect().left;
+    const nearest = entries.reduce((best, row, i) =>
+      Math.abs(turnPosition(row.turn) - cursor) < Math.abs(turnPosition(entries[best].turn) - cursor) ? i : best, 0);
+    if (nearest !== selected) { selected = nearest; draw(); }
+  });
+  canvas.addEventListener('pointerleave', () => { selected = entries.length - 1; draw(); });
+  canvas.addEventListener('keydown', (event) => {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    selected = Math.max(0, Math.min(entries.length - 1, selected + (event.key === 'ArrowLeft' ? -1 : 1)));
+    draw();
+  });
+  container.redraw = draw;
+  priceChartObserver.observe(container);
+  return [container, readout];
+}
+
+function sellDistance(entry) {
+  if (!Number.isFinite(entry.sell_limit) || entry.price <= 0) return 'Seuil de vente indisponible.';
+  const gap = entry.sell_limit - entry.price;
+  if (gap <= 0) return entry.signal < 0 ? 'Seuil atteint · Signal de vente.' : 'Seuil atteint · Voir le motif du signal.';
+  return `Encore +${price.format(gap)} (+${percent.format(gap / entry.price)}) pour atteindre le seuil de vente.`;
+}
+
 function renderSignals() {
   const last = data.decisions.at(-1);
   if (!last) return;
+  priceChartObserver.disconnect();
   $('signals-note').textContent = `Tour ${last.turn} · calcul du ${formatDate(last.at)}`;
+  const maxRows = Number($('price-range').value);
+  const history = data.market?.prices ?? [];
+  const recent = maxRows ? history.slice(-maxRows) : history;
   $('signals').replaceChildren(...Object.entries(last.products).map(([product, entry]) => {
     const card = element('article', undefined, 'card');
     const heading = element('div', undefined, 'signal-header');
     heading.append(element('h2', `Produit ${product}`), orderBadge(entry.signal));
+    const stock = element('p', 'Stock détenu · ', 'stock-line');
+    stock.append(element('strong', `${format(number, data.market?.stocks?.[product])} unités`));
     const values = element('dl', undefined, 'signal-values');
     for (const [name, value] of [['Prix', entry.price], ['Achat ≤', entry.buy_limit], ['Vente ≥', entry.sell_limit]]) {
       const pair = element('div');
       pair.append(element('dt', name), element('dd', format(price, value)));
       values.append(pair);
     }
-    card.append(heading, values, element('p', entry.reason, 'signal-reason'));
+    card.append(heading, stock, values, element('p', sellDistance(entry), 'sell-gap'));
+    const rows = recent.filter((row) => Number.isFinite(row[product]));
+    if (rows.length) card.append(...productChart(product, rows, entry));
+    card.append(element('p', entry.reason, 'signal-reason'));
     return card;
   }));
 }
@@ -233,6 +362,7 @@ async function refresh() {
 $('refresh').addEventListener('click', refresh);
 $('chart-mode').addEventListener('change', drawChart);
 $('chart-range').addEventListener('change', renderPerformance);
+$('price-range').addEventListener('change', renderSignals);
 $('cursor').addEventListener('input', drawChart);
 $('chart').addEventListener('pointermove', (event) => {
   if (!plotBounds || !points.length) return;
