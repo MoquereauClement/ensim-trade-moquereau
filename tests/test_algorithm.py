@@ -20,6 +20,20 @@ class StrategyTests(unittest.TestCase):
     def test_sell_on_reversal_in_high_zone(self):
         self.assertEqual(algorithm.compute_signal([1, 10.3, 11.3, 10.5]), -0.1)
 
+    def test_sell_after_eligible_peak_even_below_threshold_on_confirmation(self):
+        cases = {
+            "A": [1, 10.3, 11.3, 8.0],
+            "B": [12, 10, 10.6, 13.6, 12.8],
+            "C": [0.9021, 1.3177, 1.3699, 1.3495],
+        }
+        for product, prices in cases.items():
+            with self.subTest(product=product):
+                _, sell_limit = algorithm.signal_limits(prices, product)
+                self.assertLess(prices[-1], sell_limit)
+                self.assertEqual(algorithm.compute_signal(prices[:-1], product), 0)
+                self.assertEqual(algorithm.compute_signal(prices, product), -0.1)
+        self.assertEqual(algorithm.compute_signal([0.9021, 1.3177, 1.3690, 1.3495], "C"), 0)
+
     def test_middle_reversals_do_not_trade(self):
         self.assertEqual(algorithm.compute_signal([0.5, 20, 10.3, 9.3, 10.5]), 0)
         self.assertEqual(algorithm.compute_signal([0.5, 20, 10.3, 11.3, 10.5]), 0)

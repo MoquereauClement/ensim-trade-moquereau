@@ -19,7 +19,7 @@ def describe_order(prices, product, signal):
     if signal > 0:
         reason = "Rebond dans la zone d’achat."
     elif signal < 0:
-        reason = "Retournement dans la zone de vente."
+        reason = "Sommet au-dessus du seuil de vente, puis baisse confirmée."
     elif algorithm.compute_signal(prices, product):
         reason = "Ordre ramené à zéro par le budget ou le stock."
     elif buy is not None or sell is not None:
@@ -27,7 +27,7 @@ def describe_order(prices, product, signal):
         if before > previous < current:
             reason = "Rebond au-dessus du seuil d’achat." if buy is not None else "Rebond sans seuil d’achat disponible."
         elif before < previous > current:
-            reason = "Retournement sous le seuil de vente." if sell is not None else "Retournement sans seuil de vente disponible."
+            reason = "Sommet sous le seuil de vente." if sell is not None else "Retournement sans seuil de vente disponible."
         else:
             reason = "Aucun retournement sur les trois derniers prix."
     return {"price": current, "signal": signal, "buy_limit": buy, "sell_limit": sell, "reason": reason}

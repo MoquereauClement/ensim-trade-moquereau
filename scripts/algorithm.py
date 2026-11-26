@@ -79,7 +79,8 @@ def compute_signal(prices, product="A"):
 
     if buy_limit is not None and before > previous < current and current <= buy_limit:
         return TRADE_SIGNAL
-    if sell_limit is not None and before < previous > current and current >= sell_limit:
+    # Le prix précédent est le sommet. Le prix actuel confirme la baisse.
+    if sell_limit is not None and before < previous > current and previous >= sell_limit:
         return -TRADE_SIGNAL
     return 0.0
 

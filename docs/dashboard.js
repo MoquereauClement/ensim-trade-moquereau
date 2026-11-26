@@ -284,9 +284,10 @@ function productChart(product, entries, signal) {
 }
 
 function sellDistance(entry) {
+  if (entry.signal < 0) return 'Seuil atteint au tour précédent · Vente confirmée par la baisse.';
   if (!Number.isFinite(entry.sell_limit) || entry.price <= 0) return 'Seuil de vente indisponible.';
   const gap = entry.sell_limit - entry.price;
-  if (gap <= 0) return entry.signal < 0 ? 'Seuil atteint · Signal de vente.' : 'Seuil atteint · Voir le motif du signal.';
+  if (gap <= 0) return 'Seuil atteint · Voir le motif du signal.';
   return `Encore +${price.format(gap)} (+${percent.format(gap / entry.price)}) pour atteindre le seuil de vente.`;
 }
 
