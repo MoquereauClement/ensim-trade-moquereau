@@ -6,7 +6,7 @@
   <meta name="description" content="Tableau de bord du portefeuille de Clément Moquereau sur le marché ENSIM Trade Center.">
   <title>ENSIM Trade Center · Portefeuille de Clément</title>
   <link rel="stylesheet" href="./style.css">
-  <script src="./dashboard.js" defer></script>
+  <script src="./dashboard.js?v=2" defer></script>
 </head>
 <body>
   <header class="masthead">
@@ -66,8 +66,11 @@
 
     <section class="card leaderboard" id="leaderboard" aria-labelledby="leaderboard-title">
       <div class="section-heading">
-        <div><h2 id="leaderboard-title">Classement du marché</h2><p id="leaderboard-note" role="status">Chargement du classement officiel…</p></div>
-        <span id="leaderboard-position" class="badge leaderboard-position" hidden></span>
+        <div><h2 id="leaderboard-title">Classement du marché</h2><p id="leaderboard-note">Chargement du classement officiel…</p><p id="leaderboard-check" role="status" hidden></p></div>
+        <div class="chart-controls">
+          <span id="leaderboard-position" class="badge leaderboard-position" hidden></span>
+          <button id="leaderboard-refresh" type="button">Actualiser le classement</button>
+        </div>
       </div>
       <div id="leaderboard-table" class="table-scroll leaderboard-scroll" role="region" aria-labelledby="leaderboard-title" tabindex="0" hidden>
         <table><thead><tr><th scope="col">Rang</th><th scope="col">Trader</th><th scope="col">Valeur du portefeuille</th></tr></thead><tbody id="leaderboard-rows"></tbody></table>

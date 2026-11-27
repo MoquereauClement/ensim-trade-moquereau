@@ -1,6 +1,7 @@
 'use strict';
 
 const officialLeaderboardUrl = 'https://raw.githubusercontent.com/exofri/ensim-trade-center/main/docs/data/leaderboard.json';
+const leaderboardRefreshMs = 60_000;
 const series = [
   { id: 'clement', name: 'Clément', color: '#006a54', width: 3 },
   { id: 'random_trader', name: 'Trader aléatoire', color: '#285bae', width: 1.7 },
@@ -11,11 +12,15 @@ const number = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 });
 const price = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
 const percent = new Intl.NumberFormat('fr-FR', { style: 'percent', maximumFractionDigits: 2 });
 const date = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Paris' });
+const time = new Intl.DateTimeFormat('fr-FR', { timeStyle: 'short', timeZone: 'Europe/Paris' });
 const $ = (id) => document.getElementById(id);
 const format = (formatter, value) => Number.isFinite(value) ? formatter.format(value) : '—';
 const formatDate = (value) => date.format(new Date(value));
 let data = { performance: [], decisions: [] };
 let officialLeaderboard;
+let leaderboardCheckedAt;
+let leaderboardUnavailable = false;
+let leaderboardRequest = null;
 let logLimit = 20;
 let points = [];
 let plotBounds;
@@ -62,10 +67,17 @@ function renderLeaderboard() {
   $('leaderboard-position').hidden = ownPosition < 0;
   if (ownPosition >= 0) $('leaderboard-position').textContent = `Ton rang ${ownPosition + 1} sur ${rows.length}`;
   if (leaderboard) {
-    const source = useOfficial ? 'Classement officiel' : 'Dernier classement sauvegardé';
+    const source = useOfficial ? 'Publié par le prof' : 'Dernier classement sauvegardé';
     $('leaderboard-note').textContent = `${source} · ${formatDate(leaderboard.at)} (Paris)`;
   } else if (officialLeaderboard === null) {
     $('leaderboard-note').textContent = 'Classement indisponible. Réessaie avec Actualiser.';
+  }
+  const check = $('leaderboard-check');
+  check.hidden = !leaderboardCheckedAt && !leaderboardUnavailable;
+  if (leaderboardUnavailable) {
+    check.textContent = 'Le GitHub du prof ne répond pas pour le moment.';
+  } else if (leaderboardCheckedAt) {
+    check.textContent = `Dernière vérification à ${time.format(leaderboardCheckedAt)} (Paris)`;
   }
 
   $('leaderboard-rows').replaceChildren(...rows.map((entry, index) => {
@@ -79,20 +91,36 @@ function renderLeaderboard() {
   }));
 }
 
-async function refreshLeaderboard() {
+async function fetchLeaderboard() {
+  const url = new URL(officialLeaderboardUrl, window.location.href);
+  url.searchParams.set('check', Date.now());
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 6000);
+  $('leaderboard-refresh').disabled = true;
   try {
-    const response = await fetch(officialLeaderboardUrl, { cache: 'no-store', signal: AbortSignal.timeout(6000) });
+    const response = await fetch(url, { cache: 'no-store', signal: controller.signal });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const { leaderboard, generated_at: at } = await response.json();
     if (!Array.isArray(leaderboard) || !Number.isFinite(Date.parse(at))) throw new Error('Format du classement inattendu');
     if (!officialLeaderboard || Date.parse(at) >= Date.parse(officialLeaderboard.at)) {
       officialLeaderboard = { rows: leaderboard, at };
     }
+    leaderboardCheckedAt = new Date();
+    leaderboardUnavailable = false;
   } catch (error) {
     officialLeaderboard ??= null;
+    leaderboardUnavailable = true;
     console.warn('Classement officiel indisponible', error);
+  } finally {
+    clearTimeout(timeout);
+    $('leaderboard-refresh').disabled = false;
   }
   renderLeaderboard();
+}
+
+function refreshLeaderboard() {
+  leaderboardRequest ??= fetchLeaderboard().finally(() => { leaderboardRequest = null; });
+  return leaderboardRequest;
 }
 
 function renderPerformance() {
@@ -410,6 +438,12 @@ async function refresh() {
 }
 
 $('refresh').addEventListener('click', refresh);
+$('leaderboard-refresh').addEventListener('click', refreshLeaderboard);
+function refreshVisibleLeaderboard() {
+  if (document.visibilityState === 'visible') refreshLeaderboard();
+}
+document.addEventListener('visibilitychange', refreshVisibleLeaderboard);
+setInterval(refreshVisibleLeaderboard, leaderboardRefreshMs);
 $('chart-mode').addEventListener('change', drawChart);
 $('chart-range').addEventListener('change', renderPerformance);
 $('price-range').addEventListener('change', renderSignals);
