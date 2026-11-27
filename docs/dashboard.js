@@ -1,5 +1,6 @@
 'use strict';
 
+const officialLeaderboardUrl = 'https://raw.githubusercontent.com/exofri/ensim-trade-center/main/docs/data/leaderboard.json';
 const series = [
   { id: 'clement', name: 'Clément', color: '#006a54', width: 3 },
   { id: 'random_trader', name: 'Trader aléatoire', color: '#285bae', width: 1.7 },
@@ -14,6 +15,7 @@ const $ = (id) => document.getElementById(id);
 const format = (formatter, value) => Number.isFinite(value) ? formatter.format(value) : '—';
 const formatDate = (value) => date.format(new Date(value));
 let data = { performance: [], decisions: [] };
+let officialLeaderboard;
 let logLimit = 20;
 let points = [];
 let plotBounds;
@@ -50,14 +52,21 @@ function withDrawdown(rows) {
 }
 
 function renderLeaderboard() {
-  const leaderboard = data.leaderboard;
+  const saved = data.leaderboard;
+  const useOfficial = officialLeaderboard && (!saved || Date.parse(officialLeaderboard.at) >= Date.parse(saved.at));
+  const leaderboard = useOfficial ? officialLeaderboard : saved;
   const rows = leaderboard?.rows ?? [];
   $('leaderboard-table').hidden = rows.length === 0;
-  $('leaderboard-empty').hidden = rows.length > 0;
+  $('leaderboard-empty').hidden = !leaderboard || rows.length > 0;
   const ownPosition = rows.findIndex((entry) => entry.id === 'clement');
   $('leaderboard-position').hidden = ownPosition < 0;
   if (ownPosition >= 0) $('leaderboard-position').textContent = `Ton rang ${ownPosition + 1} sur ${rows.length}`;
-  if (leaderboard) $('leaderboard-note').textContent = `Tour ${leaderboard.turn} · ${formatDate(leaderboard.at)} (Paris)`;
+  if (leaderboard) {
+    const source = useOfficial ? 'Classement officiel' : 'Dernier classement sauvegardé';
+    $('leaderboard-note').textContent = `${source} · ${formatDate(leaderboard.at)} (Paris)`;
+  } else if (officialLeaderboard === null) {
+    $('leaderboard-note').textContent = 'Classement indisponible. Réessaie avec Actualiser.';
+  }
 
   $('leaderboard-rows').replaceChildren(...rows.map((entry, index) => {
     const own = entry.id === 'clement';
@@ -68,6 +77,22 @@ function renderLeaderboard() {
     row.append(element('td', index + 1), name, element('td', format(number, entry.total_value)));
     return row;
   }));
+}
+
+async function refreshLeaderboard() {
+  try {
+    const response = await fetch(officialLeaderboardUrl, { cache: 'no-store', signal: AbortSignal.timeout(6000) });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const { leaderboard, generated_at: at } = await response.json();
+    if (!Array.isArray(leaderboard) || !Number.isFinite(Date.parse(at))) throw new Error('Format du classement inattendu');
+    if (!officialLeaderboard || Date.parse(at) >= Date.parse(officialLeaderboard.at)) {
+      officialLeaderboard = { rows: leaderboard, at };
+    }
+  } catch (error) {
+    officialLeaderboard ??= null;
+    console.warn('Classement officiel indisponible', error);
+  }
+  renderLeaderboard();
 }
 
 function renderPerformance() {
@@ -359,6 +384,7 @@ function renderJournal() {
 
 async function refresh() {
   $('refresh').disabled = true;
+  const leaderboardReady = refreshLeaderboard();
   $('status').classList.remove('error');
   $('status').textContent = 'Chargement des données…';
   try {
@@ -378,6 +404,7 @@ async function refresh() {
     $('status').textContent = 'Impossible de charger les données. Réessaie avec Actualiser.';
     console.error(error);
   } finally {
+    await leaderboardReady;
     $('refresh').disabled = false;
   }
 }

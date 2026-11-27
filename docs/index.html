@@ -27,17 +27,6 @@
       <article class="card metric"><h2>Baisse maximale</h2><strong id="drawdown">—</strong><p>Plus fort recul depuis un sommet</p></article>
     </div>
 
-    <section class="card leaderboard" id="leaderboard" aria-labelledby="leaderboard-title">
-      <div class="section-heading">
-        <div><h2 id="leaderboard-title">Classement du marché</h2><p id="leaderboard-note">Dernier tour publié</p></div>
-        <span id="leaderboard-position" class="badge leaderboard-position" hidden></span>
-      </div>
-      <div id="leaderboard-table" class="table-scroll leaderboard-scroll" role="region" aria-labelledby="leaderboard-title" tabindex="0" hidden>
-        <table><thead><tr><th scope="col">Rang</th><th scope="col">Trader</th><th scope="col">Valeur du portefeuille</th></tr></thead><tbody id="leaderboard-rows"></tbody></table>
-      </div>
-      <p id="leaderboard-empty" class="empty">En attente du classement officiel.</p>
-    </section>
-
     <section class="card performance" aria-labelledby="performance-title">
       <div class="section-heading">
         <div><h2 id="performance-title">Portefeuille et références</h2><p id="chart-note">Valeurs du classement officiel</p></div>
@@ -73,6 +62,17 @@
       <div class="table-scroll"><table><thead><tr><th>Tour observé</th><th>Calcul</th><th>Produit</th><th>Ordre</th><th>Motif</th></tr></thead><tbody id="journal"></tbody></table></div>
       <p id="journal-empty" class="empty">En attente du premier calcul.</p>
       <button type="button" id="show-more" hidden>Afficher les décisions précédentes</button>
+    </section>
+
+    <section class="card leaderboard" id="leaderboard" aria-labelledby="leaderboard-title">
+      <div class="section-heading">
+        <div><h2 id="leaderboard-title">Classement du marché</h2><p id="leaderboard-note" role="status">Chargement du classement officiel…</p></div>
+        <span id="leaderboard-position" class="badge leaderboard-position" hidden></span>
+      </div>
+      <div id="leaderboard-table" class="table-scroll leaderboard-scroll" role="region" aria-labelledby="leaderboard-title" tabindex="0" hidden>
+        <table><thead><tr><th scope="col">Rang</th><th scope="col">Trader</th><th scope="col">Valeur du portefeuille</th></tr></thead><tbody id="leaderboard-rows"></tbody></table>
+      </div>
+      <p id="leaderboard-empty" class="empty" hidden>Aucun trader dans ce classement.</p>
     </section>
   </main>
   <footer class="shell footer"><a href="https://github.com/exofri/ensim-trade-center">Marché ENSIM</a><a href="https://github.com/MoquereauClement/ensim-trade-moquereau/blob/main/RAPPORT.md">Rapport du TP</a></footer>
