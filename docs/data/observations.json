@@ -2926,5 +2926,131 @@
         "C": 0.9792
       }
     ]
+  },
+  "leaderboard": {
+    "turn": 387,
+    "at": "2026-11-27T14:34:35Z",
+    "rows": [
+      {
+        "id": "taharachedi",
+        "name": "Taha Rachedi",
+        "total_value": 22217.0,
+        "baseline": false
+      },
+      {
+        "id": "gaspard",
+        "name": "Gaspard Bourdas Rougeault",
+        "total_value": 21235.61,
+        "baseline": false
+      },
+      {
+        "id": "salmazaime",
+        "name": "Salma Zaime",
+        "total_value": 20384.93,
+        "baseline": false
+      },
+      {
+        "id": "joel",
+        "name": "Joel Tchinda Tapa",
+        "total_value": 20331.15,
+        "baseline": false
+      },
+      {
+        "id": "ismail_achibat",
+        "name": "Ismail Achibat",
+        "total_value": 20238.72,
+        "baseline": false
+      },
+      {
+        "id": "molivier",
+        "name": "Mateo Olivier",
+        "total_value": 20144.78,
+        "baseline": false
+      },
+      {
+        "id": "mayahamdy",
+        "name": "Maya Hamdy",
+        "total_value": 20031.91,
+        "baseline": false
+      },
+      {
+        "id": "clement",
+        "name": "Clement Moquereau",
+        "total_value": 20024.0,
+        "baseline": false
+      },
+      {
+        "id": "hendzormati",
+        "name": "Hend Zormati",
+        "total_value": 20019.25,
+        "baseline": false
+      },
+      {
+        "id": "eric-lefebvre",
+        "name": "Eric Lefebvre",
+        "total_value": 20018.12,
+        "baseline": false
+      },
+      {
+        "id": "paul_transon",
+        "name": "Paul Transon",
+        "total_value": 20017.83,
+        "baseline": false
+      },
+      {
+        "id": "franck",
+        "name": "Franck Nana Talom",
+        "total_value": 20013.6,
+        "baseline": false
+      },
+      {
+        "id": "lodesthard",
+        "name": "Gabriel Brault",
+        "total_value": 20013.6,
+        "baseline": false
+      },
+      {
+        "id": "aziz",
+        "name": "Bel Hadj Salah",
+        "total_value": 20013.6,
+        "baseline": false
+      },
+      {
+        "id": "e2606220",
+        "name": "Oumayma Brahmi",
+        "total_value": 20003.45,
+        "baseline": false
+      },
+      {
+        "id": "random_buyer",
+        "name": "random_buyer",
+        "total_value": 19961.57,
+        "baseline": true
+      },
+      {
+        "id": "warren",
+        "name": "Warren Samir Betchem Ngon",
+        "total_value": 19958.79,
+        "baseline": false
+      },
+      {
+        "id": "random_trader",
+        "name": "random_trader",
+        "total_value": 19939.72,
+        "baseline": true
+      },
+      {
+        "id": "tester",
+        "name": "ENSIM tester",
+        "total_value": 18971.49,
+        "baseline": false
+      },
+      {
+        "id": "random_seller",
+        "name": "random_seller",
+        "total_value": 18005.8,
+        "baseline": true
+      }
+    ]
   }
 }
