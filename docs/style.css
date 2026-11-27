@@ -32,7 +32,7 @@ h2 { font-size: 1.2rem; }
 .metric:first-child { border-top-color: var(--accent); }
 .metric h2 { font-size: .9rem; color: var(--muted); }
 .metric strong { display: block; font-size: clamp(1.55rem, 3.3vw, 2.1rem); font-variant-numeric: tabular-nums; margin: .35rem 0; letter-spacing: -.035em; }
-.performance, .signals-section, .journal { margin-top: 1.15rem; }
+.leaderboard, .performance, .signals-section, .journal { margin-top: 1.15rem; }
 .section-heading { display: flex; justify-content: space-between; gap: .8rem; align-items: start; }
 .section-heading p { margin-top: .25rem; line-height: 1.45; }
 .chart-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: end; gap: .45rem; font-size: .9rem; color: var(--muted); }
@@ -64,6 +64,17 @@ input[type='range'] { accent-color: var(--accent); max-width: 40%; }
 .badge { display: inline-block; font-size: .86rem; font-weight: 700; border-radius: .4rem; padding: .28rem .49rem; background: #e8efec; color: #37534c; white-space: nowrap; }
 .badge.buy { background: #d7f5e7; color: #00523d; }
 .badge.sell { background: #fae6e4; color: #832b31; }
+.leaderboard-position { color: #00523d; background: #d7f5e7; }
+.leaderboard-position[hidden] { display: none; }
+.leaderboard-scroll { max-height: 21rem; margin-top: .7rem; }
+.leaderboard-scroll table { margin-top: 0; }
+.leaderboard-scroll thead th { position: sticky; top: 0; background: #fff; white-space: normal; }
+.leaderboard-scroll tbody th { color: inherit; white-space: normal; font-weight: 550; }
+.leaderboard-scroll td:first-child { width: 4rem; }
+.leaderboard-scroll td:last-child, .leaderboard-scroll thead th:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+.leaderboard-scroll td:last-child { white-space: nowrap; }
+.leaderboard-own { background: #e2f4eb; color: #00523d; font-weight: 700; }
+.leaderboard-label { margin-left: .45rem; font-weight: 550; padding: .12rem .35rem; }
 .signal-values { display: grid; grid-template-columns: repeat(3, 1fr); gap: .2rem; margin: .8rem 0; }
 .signal-values dt { font-size: .85rem; color: var(--muted); }
 .signal-values dd { margin: .2rem 0 0; font-weight: 700; font-variant-numeric: tabular-nums; }

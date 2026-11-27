@@ -49,6 +49,27 @@ function withDrawdown(rows) {
   });
 }
 
+function renderLeaderboard() {
+  const leaderboard = data.leaderboard;
+  const rows = leaderboard?.rows ?? [];
+  $('leaderboard-table').hidden = rows.length === 0;
+  $('leaderboard-empty').hidden = rows.length > 0;
+  const ownPosition = rows.findIndex((entry) => entry.id === 'clement');
+  $('leaderboard-position').hidden = ownPosition < 0;
+  if (ownPosition >= 0) $('leaderboard-position').textContent = `Ton rang ${ownPosition + 1} sur ${rows.length}`;
+  if (leaderboard) $('leaderboard-note').textContent = `Tour ${leaderboard.turn} · ${formatDate(leaderboard.at)} (Paris)`;
+
+  $('leaderboard-rows').replaceChildren(...rows.map((entry, index) => {
+    const own = entry.id === 'clement';
+    const row = element('tr', undefined, own ? 'leaderboard-own' : undefined);
+    const name = element('th', entry.name);
+    name.scope = 'row';
+    if (own || entry.baseline) name.append(element('span', own ? 'Toi' : 'Référence', 'badge leaderboard-label'));
+    row.append(element('td', index + 1), name, element('td', format(number, entry.total_value)));
+    return row;
+  }));
+}
+
 function renderPerformance() {
   const rows = withDrawdown(data.performance);
   const own = rows.filter((row) => Number.isFinite(row.values.clement));
@@ -346,6 +367,7 @@ async function refresh() {
     const snapshot = await response.json();
     if (!Array.isArray(snapshot.performance) || !Array.isArray(snapshot.decisions)) throw new Error('Format inattendu');
     data = snapshot;
+    renderLeaderboard();
     renderPerformance();
     renderSignals();
     renderJournal();

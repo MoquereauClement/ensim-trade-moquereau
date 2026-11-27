@@ -73,14 +73,29 @@ def update_round(market, holdings, leaderboard, data_path=DATA_PATH, decision_pa
         "stocks": {name: holdings["products"][name] for name in product_names},
         "prices": [{"turn": entry["t"], **{name: entry[name] for name in product_names}} for entry in history],
     }
+    ranking = {
+        "turn": turn,
+        "at": row["timestamp"],
+        "rows": [
+            {
+                "id": entry["id"],
+                "name": entry.get("name", entry["id"]),
+                "total_value": entry["total_value"],
+                "baseline": bool(entry.get("baseline", False)),
+            }
+            for entry in leaderboard["leaderboard"]
+        ],
+    }
     if data["decisions"] and turn == data["decisions"][-1]["turn"]:
-        if data.get("market") == snapshot:
+        if data.get("market") == snapshot and data.get("leaderboard") == ranking:
             return False
         data["market"] = snapshot
+        data["leaderboard"] = ranking
         write_json(data_path, data)
         return True
 
     data["market"] = snapshot
+    data["leaderboard"] = ranking
     decision = algorithm.build_decision(market, holdings)
     products = {
         name: describe_order([entry[name] for entry in history], name, decision[name])

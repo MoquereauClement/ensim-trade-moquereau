@@ -20,7 +20,14 @@ class RoundUpdateTests(unittest.TestCase):
             ],
         }
         holdings = {"money": 2000, "products": {"A": 1000, "B": 1000, "C": 1000}}
-        leaderboard = {"generated_at": timestamp, "leaderboard": [{"id": "clement", "total_value": 18000}]}
+        leaderboard = {
+            "generated_at": timestamp,
+            "leaderboard": [
+                {"id": "peer", "name": "Autre élève", "total_value": 19000, "baseline": False},
+                {"id": "clement", "name": "Clément", "total_value": 18000, "baseline": False},
+                {"id": "random_trader", "name": "Trader aléatoire", "total_value": 17000, "baseline": True},
+            ],
+        }
         with tempfile.TemporaryDirectory() as folder:
             data_path = Path(folder) / "observations.json"
             decision_path = Path(folder) / "decision.json"
@@ -29,13 +36,16 @@ class RoundUpdateTests(unittest.TestCase):
             decision = json.loads(decision_path.read_text(encoding="utf-8"))
             self.assertEqual(observation["decisions"][0]["products"]["A"]["signal"], 1.0)
             self.assertEqual(decision["A"], 1.0)
-            self.assertEqual(observation["performance"][0]["values"], {"clement": 18000})
+            self.assertEqual(observation["performance"][0]["values"], {"clement": 18000, "random_trader": 17000})
+            self.assertEqual(observation["leaderboard"], {
+                "turn": 371, "at": timestamp, "rows": leaderboard["leaderboard"],
+            })
             self.assertEqual(observation["market"]["cash"], holdings["money"])
             self.assertEqual(observation["market"]["stocks"], holdings["products"])
             self.assertEqual(observation["market"]["prices"][-1], {"turn": 371, "A": 10.5, "B": 10, "C": 1})
 
             # Ajouter les nouvelles données au journal existant sans republier l'ordre.
-            legacy = {key: value for key, value in observation.items() if key != "market"}
+            legacy = {key: value for key, value in observation.items() if key != "leaderboard"}
             data_path.write_text(json.dumps(legacy), encoding="utf-8")
             decision_before = decision_path.read_bytes()
             self.assertTrue(update_round(market, holdings, leaderboard, data_path, decision_path))
