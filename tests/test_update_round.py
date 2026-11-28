@@ -3,9 +3,10 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from update_round import update_round
+from update_round import algorithm, update_round
 
 
 class RoundUpdateTests(unittest.TestCase):
@@ -16,7 +17,7 @@ class RoundUpdateTests(unittest.TestCase):
             "products": ["A", "B", "C"],
             "history": [
                 {"t": t, "timestamp": timestamp, "A": price, "B": 10, "C": 1}
-                for t, price in enumerate([20, 10.3, 9.3, 10.5], 368)
+                for t, price in enumerate([20, 10.3, 9.3, 9.8], 368)
             ],
         }
         holdings = {"money": 2000, "products": {"A": 1000, "B": 1000, "C": 1000}}
@@ -42,7 +43,7 @@ class RoundUpdateTests(unittest.TestCase):
             })
             self.assertEqual(observation["market"]["cash"], holdings["money"])
             self.assertEqual(observation["market"]["stocks"], holdings["products"])
-            self.assertEqual(observation["market"]["prices"][-1], {"turn": 371, "A": 10.5, "B": 10, "C": 1})
+            self.assertEqual(observation["market"]["prices"][-1], {"turn": 371, "A": 9.8, "B": 10, "C": 1})
 
             # Ajouter les nouvelles données au journal existant sans republier l'ordre.
             legacy = {key: value for key, value in observation.items() if key != "leaderboard"}
@@ -64,3 +65,28 @@ class RoundUpdateTests(unittest.TestCase):
                 update_round(market, {}, leaderboard, data_path, decision_path)
             self.assertEqual(decision_path.read_text(encoding="utf-8"), "existing decision")
             self.assertFalse(data_path.exists())
+
+    def test_changed_sell_tolerance_updates_the_current_order_without_a_duplicate(self):
+        timestamp = "2026-11-28T14:52:34Z"
+        market = {
+            "generated_at": timestamp,
+            "products": ["B"],
+            "history": [
+                {"t": t, "timestamp": timestamp, "B": price}
+                for t, price in enumerate([10.1318, 12.7085, 12.7545, 12.5694], 387)
+            ],
+        }
+        holdings = {"money": 957.39, "products": {"B": 1000}}
+        leaderboard = {"generated_at": timestamp, "leaderboard": []}
+        with tempfile.TemporaryDirectory() as folder:
+            data_path = Path(folder) / "observations.json"
+            decision_path = Path(folder) / "decision.json"
+            with patch.object(algorithm, "TARGET_TOLERANCE", 0.03):
+                self.assertTrue(update_round(market, holdings, leaderboard, data_path, decision_path))
+            self.assertEqual(json.loads(decision_path.read_text(encoding="utf-8"))["B"], 0)
+            self.assertTrue(update_round(market, holdings, leaderboard, data_path, decision_path))
+            self.assertEqual(json.loads(decision_path.read_text(encoding="utf-8"))["B"], -1)
+            log = json.loads(data_path.read_text(encoding="utf-8"))["decisions"]
+            self.assertEqual([entry["turn"] for entry in log], [390])
+            self.assertEqual(log[0]["products"]["B"]["signal"], -1)
+            self.assertFalse(update_round(market, holdings, leaderboard, data_path, decision_path))

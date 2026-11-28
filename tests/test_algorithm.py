@@ -15,7 +15,7 @@ spec.loader.exec_module(algorithm)
 
 class StrategyTests(unittest.TestCase):
     def test_buy_on_rebound_in_low_zone(self):
-        self.assertEqual(algorithm.compute_signal([20, 10.3, 9.3, 10.5]), 1.0)
+        self.assertEqual(algorithm.compute_signal([20, 10.3, 9.3, 9.8]), 1.0)
 
     def test_sell_on_reversal_in_high_zone(self):
         self.assertEqual(algorithm.compute_signal([1, 10.3, 11.3, 10.5]), -1.0)
@@ -23,8 +23,8 @@ class StrategyTests(unittest.TestCase):
     def test_sell_after_eligible_peak_even_below_threshold_on_confirmation(self):
         cases = {
             "A": [1, 10.3, 11.3, 8.0],
-            "B": [12, 10, 10.6, 13.6, 12.8],
-            "C": [0.9021, 1.3177, 1.3699, 1.3495],
+            "B": [12, 10, 10.6, 13.6, 12.45],
+            "C": [0.9021, 1.3177, 1.3699, 1.30],
         }
         for product, prices in cases.items():
             with self.subTest(product=product):
@@ -32,7 +32,7 @@ class StrategyTests(unittest.TestCase):
                 self.assertLess(prices[-1], sell_limit)
                 self.assertEqual(algorithm.compute_signal(prices[:-1], product), 0)
                 self.assertEqual(algorithm.compute_signal(prices, product), -1.0)
-        self.assertEqual(algorithm.compute_signal([0.9021, 1.3177, 1.3690, 1.3495], "C"), 0)
+        self.assertEqual(algorithm.compute_signal([0.9021, 1.23, 1.312, 1.30], "C"), 0)
 
     def test_middle_reversals_do_not_trade(self):
         self.assertEqual(algorithm.compute_signal([0.5, 20, 10.3, 9.3, 10.5]), 0)
@@ -73,6 +73,12 @@ class StrategyTests(unittest.TestCase):
         self.assertEqual(algorithm.compute_signal([10, 12, 10, 9.8, 9.7], "B"), 0)
         self.assertEqual(algorithm.compute_signal([3, 3.3, 2.8, 1.95, 1.9], "C"), 0)
 
+    def test_c_buy_tolerance_allows_rebound_but_not_a_falling_price(self):
+        descent = [1.37, 0.89, 0.8246]
+        self.assertEqual(algorithm.compute_signal(descent, "C"), 0)
+        self.assertEqual(algorithm.compute_signal(descent + [0.856], "C"), 1.0)
+        self.assertEqual(algorithm.compute_signal(descent + [0.883], "C"), 0)
+
     def test_cycle_references_filter_noise_and_use_latest_peak(self):
         prices = [10, 12, 11.9, 12.1, 11, 9, 10, 11, 10]
         self.assertEqual(algorithm.cycle_references(prices, 0.05), (11, 9))
@@ -99,18 +105,18 @@ class StrategyTests(unittest.TestCase):
             return json.loads(destination.read_text(encoding="utf-8"))
 
     def test_main_can_trade_all_three_products(self):
-        result = self.run_main([20, 10.3, 9.3, 10.5], money=4000)
+        result = self.run_main([20, 10.3, 9.3, 9.8], money=4000)
         self.assertEqual(result["A"], 1.0)
         self.assertEqual(result["B"], 1.0)
         self.assertEqual(result["C"], 1.0)
         self.assertTrue(result["updated_at"].endswith("Z"))
 
     def test_simultaneous_buys_share_one_budget(self):
-        result = self.run_main([20, 10.3, 9.3, 10.5], money=1500)
-        spent = sum(100 * max(0, result[p]) * 10.5 for p in ["A", "B", "C"])
+        result = self.run_main([20, 10.3, 9.3, 9.8], money=1500)
+        spent = sum(100 * max(0, result[p]) * 9.8 for p in ["A", "B", "C"])
         self.assertLessEqual(spent, 1500 - algorithm.MIN_MONEY_RESERVE)
         self.assertEqual(result["A"], 1.0)
-        self.assertEqual(result["B"], 0.38)
+        self.assertEqual(result["B"], 0.479)
         self.assertEqual(result["C"], 0)
 
     def test_sales_are_not_counted_as_available_cash(self):

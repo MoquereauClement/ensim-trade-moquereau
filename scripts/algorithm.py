@@ -8,13 +8,12 @@ MARKET_URL = "https://raw.githubusercontent.com/exofri/ensim-trade-center/refs/h
 HOLDINGS_URL = "https://raw.githubusercontent.com/exofri/ensim-trade-center/main/traders/clement/holdings.json"
 
 MIN_MONEY_RESERVE = 50 # never let a buy signal spend below this much money
-ZONE_FRACTION = 0.15
+TARGET_TOLERANCE = 0.07  # Marge commune pour A, B et C, à l'achat et à la vente
 TRADE_SIGNAL = 1.0  # 100 unités maximum par ordre
 CYCLE_RULES = {
     "B": {"drop": 0.174, "rise": 0.349, "reversal": 0.05},
     "C": {"drop": 0.400, "rise": 0.565, "reversal": 0.10},
 }
-TARGET_TOLERANCE = 0.03  # Zone de 3 % autour du prix cible estimé
 DECISION_PATH = Path(__file__).resolve().parents[1] / "decision.json"
 
 def fetch_json(url):
@@ -60,13 +59,16 @@ def signal_limits(prices, product):
         low, high = min(prices), max(prices)
         if high == low:
             return None, None
-        return low + ZONE_FRACTION * (high - low), high - ZONE_FRACTION * (high - low)
-    if product not in CYCLE_RULES:
+        buy_target, sell_target = low, high
+    elif product not in CYCLE_RULES:
         return None, None
-    rule = CYCLE_RULES[product]
-    peak, trough = cycle_references(prices, rule["reversal"])
-    buy = peak * (1 - rule["drop"]) * (1 + TARGET_TOLERANCE) if peak is not None else None
-    sell = trough * (1 + rule["rise"]) * (1 - TARGET_TOLERANCE) if trough is not None else None
+    else:
+        rule = CYCLE_RULES[product]
+        peak, trough = cycle_references(prices, rule["reversal"])
+        buy_target = peak * (1 - rule["drop"]) if peak is not None else None
+        sell_target = trough * (1 + rule["rise"]) if trough is not None else None
+    buy = buy_target * (1 + TARGET_TOLERANCE) if buy_target is not None else None
+    sell = sell_target * (1 - TARGET_TOLERANCE) if sell_target is not None else None
     return buy, sell
 
 

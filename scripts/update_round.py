@@ -1,4 +1,4 @@
-"""Publie le tableau de bord et, pour chaque nouveau tour, un ordre."""
+"""Publie le tableau de bord et l’ordre établi sur le dernier tour."""
 
 import json
 from datetime import datetime, timezone
@@ -61,7 +61,8 @@ def update_round(market, holdings, leaderboard, data_path=DATA_PATH, decision_pa
     data = json.loads(data_path.read_text(encoding="utf-8")) if data_path.exists() else {"performance": [], "decisions": []}
     row = history[-1]
     turn = row["t"]
-    if data["decisions"] and turn < data["decisions"][-1]["turn"]:
+    last_decision = data["decisions"][-1] if data["decisions"] else None
+    if last_decision and turn < last_decision["turn"]:
         return False
     if data["performance"] and turn < data["performance"][-1]["turn"]:
         raise ValueError("Le tour reçu est antérieur au dernier classement déjà enregistré.")
@@ -86,7 +87,13 @@ def update_round(market, holdings, leaderboard, data_path=DATA_PATH, decision_pa
             for entry in leaderboard["leaderboard"]
         ],
     }
-    if data["decisions"] and turn == data["decisions"][-1]["turn"]:
+    decision = algorithm.build_decision(market, holdings)
+    products = {
+        name: describe_order([entry[name] for entry in history], name, decision[name])
+        for name in product_names
+    }
+    same_turn = last_decision is not None and turn == last_decision["turn"]
+    if same_turn and last_decision["products"] == products:
         if data.get("market") == snapshot and data.get("leaderboard") == ranking:
             return False
         data["market"] = snapshot
@@ -96,17 +103,17 @@ def update_round(market, holdings, leaderboard, data_path=DATA_PATH, decision_pa
 
     data["market"] = snapshot
     data["leaderboard"] = ranking
-    decision = algorithm.build_decision(market, holdings)
-    products = {
-        name: describe_order([entry[name] for entry in history], name, decision[name])
-        for name in product_names
-    }
     point = performance_point(row, leaderboard)
     if data["performance"] and data["performance"][-1]["turn"] == turn:
         data["performance"][-1] = point
     else:
         data["performance"].append(point)
-    data["decisions"].append({"turn": turn, "at": decision["updated_at"], "products": products})
+    entry = {"turn": turn, "at": decision["updated_at"], "products": products}
+    # Un réglage peut changer l’ordre à envoyer avant le prochain tour.
+    if same_turn:
+        data["decisions"][-1] = entry
+    else:
+        data["decisions"].append(entry)
     write_json(decision_path, decision)
     write_json(data_path, data)
     return True
